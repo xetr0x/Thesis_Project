@@ -37,7 +37,6 @@ client.loop_start()
 
 
 for i in range(1):
-    message = f"Hello World {i}"
     client.publish("thesis/anomalies/2", json_payload)
     print(f"Published: {json_payload}")
     time.sleep(5)
