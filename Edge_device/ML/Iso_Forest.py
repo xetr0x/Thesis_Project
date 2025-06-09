@@ -16,9 +16,9 @@ import copy
 import joblib
 
 
-DEFAULT_WINDOW_SIZE = 5000   # size of window
-DEFAULT_STEP_SIZE = 500  # % of the sliding window it will move
-ANOMALY_THRESHOLD = 0.10 # retrain if more than 5% is anomalies.
+DEFAULT_WINDOW_SIZE = 5000   # size of sliding window
+DEFAULT_STEP_SIZE = 500  # amount of indexes of the sliding window it will move
+ANOMALY_THRESHOLD = 0.10 # retrain if more than 10% is anomalies.
 SEC_SIZE = 500 # the size of the "section"
 RESULT_FILE = 'iso_results.csv' # file where results are saved
 FEATURES = ['Temperature (°C)', 'Humidity (%)',
@@ -42,9 +42,8 @@ class Iso_Forest:
         self.curr_index = 0
 
         data = gb.collect_data(0, DEFAULT_WINDOW_SIZE)
-        # print(data)
         df = gb.data_cleaner(data, features=self.features)
-        # print(type(df))
+
 
 # keeps track of section samples, section is finnished, it gets
 # evoluated if model needs fitting, added to csv file and reset for
@@ -52,11 +51,9 @@ class Iso_Forest:
         self.df_last_sec = []
 
         df, self.current_scaler = self.fix_scaler(df[self.features])
-        # print("this type:", type(df))
         self.model = IsolationForest(n_estimators=self.n_trees,
                                      contamination=self.contamination,
                                      max_samples=self.sample_size)
- # tracks the current index at which the sliding window starts
         self.model.fit(df[self.features])
 
 
@@ -67,7 +64,6 @@ class Iso_Forest:
         scaler.fit(train_x[FEATURES])
         x_scaled = scaler.transform(train_x[FEATURES])
         x_scaled = pd.DataFrame(x_scaled, columns=FEATURES)
-        # joblib.dump(scaler, 'iso_scaler.sav')
         return x_scaled, scaler
 
 
